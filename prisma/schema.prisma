@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  nombre        String
+  email         String   @unique
+  password      String
+  rol           Role     @default(CLIENTE)
+  reservas      Reserva[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Barber {
+  id          String @id @default(cuid())
+  nombre      String
+  descripcion String?
+  activo      Boolean @default(true)
+
+  reservas Reserva[]
+
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id          String @id @default(cuid())
+  nombre      String
+  descripcion String?
+  precio      Float
+  duracion    Int
+
+  reservas Reserva[]
+
+  createdAt DateTime @default(now())
+}
+
+model Reserva {
+  id        String @id @default(cuid())
+
+  fecha     DateTime
+  hora      String
+  estado    EstadoReserva @default(PENDIENTE)
+
+  usuarioId String
+  usuario   User @relation(fields: [usuarioId], references: [id])
+
+  barberId String
+  barber   Barber @relation(fields: [barberId], references: [id])
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  BARBERO
+  CLIENTE
+}
+
+enum EstadoReserva {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
+  FINALIZADA
+}
