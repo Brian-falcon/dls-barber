@@ -10,6 +10,6 @@ export async function GET(request: Request) {
   const date = url.searchParams.get("date") || "";
   if (!reservaId || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
   const reservation = await prisma.reserva.findUnique({ where: { id: reservaId }, select: { id: true, serviceId: true, barberId: true, estado: true } });
-  if (!reservation || reservation.estado === "FINALIZADA") return NextResponse.json({ error: "Reserva no disponible para reprogramar" }, { status: 404 });
+  if (!reservation) return NextResponse.json({ error: "Reserva no disponible para reprogramar" }, { status: 404 });
   return NextResponse.json({ slots: await getAvailableSlots(reservation.serviceId, reservation.barberId, date, reservation.id) });
 }

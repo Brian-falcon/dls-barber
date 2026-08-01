@@ -27,7 +27,7 @@ export async function PATCH(request: Request) {
       data: {
         fecha: new Date(`${date}T00:00:00.000Z`),
         hora: time,
-        estado: reserva.estado === "CANCELADA" ? "PENDIENTE" : reserva.estado,
+        estado: ["CANCELADA", "FINALIZADA"].includes(reserva.estado) ? "PENDIENTE" : reserva.estado,
       }, include: { usuario: { select: { nombre: true, email: true } }, barber: { select: { nombre: true } }, service: { select: { nombre: true } } },
     });
     sendReservationEmail({ to: updated.usuario.email, name: updated.usuario.nombre, barber: updated.barber.nombre, service: updated.service.nombre, date: updated.fecha, time: updated.hora, status: "REPROGRAMADA" }).catch((error) => console.error("Reservation email failed", error));
