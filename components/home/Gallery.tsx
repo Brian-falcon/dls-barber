@@ -1,25 +1,11 @@
-"use client";
+import Image from "next/image";
 
-import { motion } from "framer-motion";
-
-const moments = [
-  ["PRECISIÓN", "Degradados y terminaciones al detalle"], ["RITUAL", "Un momento para renovar tu imagen"], ["ACTITUD", "Estilo que habla por vos"],
-  ["BARBA", "Perfilado con carácter"], ["CLÁSICO", "Técnica que nunca falla"], ["DLS", "Tu próxima versión"],
+const work = [
+  { src: "/images/work/corte-editorial.png", title: "Corte editorial", text: "Textura, movimiento y terminación precisa.", wide: true },
+  { src: "/images/work/barba-premium.png", title: "Barba premium", text: "Diseño definido para una presencia impecable." },
+  { src: "/images/work/fade-proceso.png", title: "Fade al detalle", text: "Técnica, transición y personalidad.", wide: true },
 ];
 
 export default function Gallery() {
-  return (
-    <section id="galeria" className="py-24 px-6 bg-black text-white">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center"><p className="text-sm uppercase tracking-[0.35em] text-[var(--gold)]">Galería</p><h2 className="mt-4 text-4xl font-semibold md:text-5xl">Momentos de estilo</h2><p className="mx-auto mt-4 max-w-2xl text-slate-400">Descubrí el ambiente, los cortes y la elegancia que define a DLS BARBER.</p></div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {moments.map(([label, caption], index) => (
-            <motion.div key={label} initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.45, delay: index * 0.08 }} viewport={{ once: true, amount: 0.2 }} className="home-gallery-card">
-              <div className="home-gallery-shape" data-index={index}><span>{label}</span></div><p>{caption}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  return <section id="galeria" className="home-work-section" aria-labelledby="trabajos-title"><div className="home-container"><div className="home-section-heading home-section-heading-left"><p>Trabajos reales</p><h2 id="trabajos-title">Detalle que se nota</h2><span>Cortes, fades y perfilados construidos para acompañar tu identidad.</span></div><div className="home-work-grid">{work.map((item) => <article key={item.title} className={`home-work-card ${item.wide ? "home-work-card-wide" : ""}`}><Image src={item.src} alt={`${item.title} realizado en DLS BARBER`} fill sizes="(max-width: 700px) 100vw, 50vw" className="home-work-image" /><div className="home-work-overlay"><p>{item.title}</p><span>{item.text}</span></div></article>)}</div></div></section>;
 }

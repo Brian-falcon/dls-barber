@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
@@ -17,10 +18,17 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     if (assigned && assigned.id !== id) return NextResponse.json({ error: "La cuenta ya está asignada a otro barbero" }, { status: 409 });
   }
 
-  const updated = await prisma.barber.update({
-    where: { id },
-    data: { userId },
-    include: { user: { select: { id: true, nombre: true, email: true } } },
-  });
-  return NextResponse.json({ barber: updated });
+  try {
+    const updated = await prisma.barber.update({
+      where: { id },
+      data: { userId },
+      include: { user: { select: { id: true, nombre: true, email: true } } },
+    });
+    return NextResponse.json({ barber: updated });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ error: "La cuenta ya está asignada a otro profesional" }, { status: 409 });
+    }
+    throw error;
+  }
 }

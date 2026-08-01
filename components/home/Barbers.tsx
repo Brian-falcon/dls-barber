@@ -1,44 +1,20 @@
-"use client"
+"use client";
+
 import { motion } from "framer-motion";
-import Card from "@/components/ui/Card";
+import { BadgeCheck, Scissors } from "lucide-react";
 
-const barbers = [
-  { name: "Marco", role: "Maestro del corte clásico" },
-  { name: "Luis", role: "Especialista en fades y diseño" },
-  { name: "Sofía", role: "Experta en barba y detalles premium" },
-];
+type Barber = { id: string; nombre: string; descripcion: string | null };
 
-export default function Barbers() {
+export default function Barbers({ barbers }: { barbers: Barber[] }) {
   return (
-    <section id="barberos" className="py-24 px-6 bg-[#070707] text-white">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-12 text-center">
-          <p className="text-sm uppercase tracking-[0.35em] text-[var(--gold)]">Nuestros expertos</p>
-          <h2 className="mt-4 text-4xl font-semibold md:text-5xl">Barberos de confianza</h2>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {barbers.map((barber, index) => (
-            <motion.div
-              key={barber.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: index * 0.12 }}
-              viewport={{ once: true, amount: 0.3 }}
-            >
-              <Card>
-                <div className="flex items-center justify-between gap-4 mb-6">
-                  <div className="h-20 w-20 rounded-full bg-slate-800 border border-[var(--gold)]" />
-                  <div className="text-right text-sm uppercase tracking-[0.25em] text-[var(--gold)]">
-                    Staff
-                  </div>
-                </div>
-                <h3 className="text-2xl font-semibold mb-2">{barber.name}</h3>
-                <p className="text-slate-300">{barber.role}</p>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+    <section id="barberos" className="home-team-section" aria-labelledby="barberos-title">
+      <div className="home-container">
+        <div className="home-section-heading"><p>Nuestro equipo</p><h2 id="barberos-title">Profesionales que hacen la diferencia</h2><span>Conocé al equipo disponible y elegí con quién querés reservar tu próxima visita.</span></div>
+        {barbers.length ? <div className="home-team-grid">{barbers.map((barber, index) => (
+          <motion.article key={barber.id} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: index * 0.08 }} viewport={{ once: true, amount: 0.2 }} className="home-team-card">
+            <div className="home-team-monogram">{barber.nombre.slice(0, 1).toUpperCase()}</div><div className="home-team-card-top"><span><BadgeCheck size={15} /> Disponible</span><Scissors size={18} /></div><h3>{barber.nombre}</h3><p>{barber.descripcion?.trim() || "Profesional de DLS BARBER, listo para tu próxima reserva."}</p>
+          </motion.article>
+        ))}</div> : <p className="home-empty-state">Pronto vas a conocer a nuestro equipo.</p>}
       </div>
     </section>
   );
