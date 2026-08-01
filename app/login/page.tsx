@@ -61,6 +61,7 @@ export default function LoginPage() {
             />
           </label>
           {error && <p className="text-sm text-rose-400">{error}</p>}
+          <Link href="/recuperar-contrasena" className="text-right text-sm text-[var(--gold)] hover:underline">¿Olvidaste tu contraseña?</Link>
           <button
             type="submit"
             disabled={isLoading}

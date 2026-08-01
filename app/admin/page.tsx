@@ -64,11 +64,11 @@ export default async function AdminPage() {
           <div>
             <section className="mb-6">
               <h2 className="text-xl font-medium text-[#D4AF37] mb-3">Usuarios</h2>
-              <UsersAdmin initial={users} />
+              <UsersAdmin key={users.map((user) => `${user.id}-${user.rol}`).join("|")} initial={users} />
             </section>
             <section>
               <h2 className="text-xl font-medium text-[#D4AF37] mb-3">Barberos</h2>
-              <BarbersAdmin initial={barbers} staff={staff} />
+              <BarbersAdmin key={`${barbers.map((barber) => `${barber.id}-${barber.userId ?? ""}`).join("|")}-${staff.map((user) => user.id).join("|")}`} initial={barbers} staff={staff} />
             </section>
           </div>
         </div>
