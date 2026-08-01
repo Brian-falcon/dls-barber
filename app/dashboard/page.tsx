@@ -9,7 +9,7 @@ import BarberSchedule from "@/components/dashboard/BarberSchedule";
 export default async function DashboardPage() {
   const session = await getSession();
   if (!session) redirect("/login");
-  const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, nombre: true, email: true, telefono: true, rol: true } });
+  const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, nombre: true, email: true, telefono: true, avatar: true, rol: true } });
   if (!user) redirect("/login");
 
   if (user.rol === "BARBERO") {

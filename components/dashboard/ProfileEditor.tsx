@@ -1,0 +1,26 @@
+"use client";
+/* eslint-disable @next/next/no-img-element */
+
+import { ChangeEvent, useState } from "react";
+import { Camera, Pencil, Save, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+type Profile = { id: string; nombre: string; email: string; telefono?: string | null; avatar?: string | null; rol?: "ADMIN" | "BARBERO" | "CLIENTE" };
+
+async function compressImage(file: File) {
+  if (!file.type.startsWith("image/")) throw new Error("Elegí un archivo de imagen.");
+  const source = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("No se pudo leer la imagen.")); reader.readAsDataURL(file); });
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => { const item = new Image(); item.onload = () => resolve(item); item.onerror = () => reject(new Error("No se pudo procesar la imagen.")); item.src = source; });
+  const size = Math.min(320, image.width, image.height); const canvas = document.createElement("canvas"); canvas.width = size; canvas.height = size;
+  const context = canvas.getContext("2d"); if (!context) throw new Error("No se pudo procesar la imagen.");
+  const side = Math.min(image.width, image.height); context.drawImage(image, (image.width - side) / 2, (image.height - side) / 2, side, side, 0, 0, size, size);
+  return canvas.toDataURL("image/webp", .82);
+}
+
+export default function ProfileEditor({ initial }: { initial: Profile }) {
+  const router = useRouter(); const [editing, setEditing] = useState(false); const [nombre, setNombre] = useState(initial.nombre); const [email, setEmail] = useState(initial.email); const [telefono, setTelefono] = useState(initial.telefono ?? ""); const [avatar, setAvatar] = useState(initial.avatar ?? ""); const [message, setMessage] = useState<string | null>(null); const [saving, setSaving] = useState(false);
+  async function selectImage(event: ChangeEvent<HTMLInputElement>) { const file = event.target.files?.[0]; if (!file) return; try { setAvatar(await compressImage(file)); setMessage(null); } catch (error) { setMessage(error instanceof Error ? error.message : "No se pudo cargar la foto."); } }
+  async function save(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setSaving(true); setMessage(null); try { const response = await fetch("/api/auth/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nombre, email, telefono, avatar: avatar || null }) }); const data = await response.json(); if (!response.ok) return setMessage(data.error ?? "No se pudo guardar el perfil."); setEditing(false); setMessage("Perfil actualizado correctamente."); router.refresh(); } catch { setMessage("No se pudo guardar el perfil."); } finally { setSaving(false); } }
+  if (!editing) return <><div className="mt-6 border-t border-gray-700 pt-5"><button onClick={() => setEditing(true)} className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/60 px-3 py-2 text-sm font-medium text-[var(--gold)]"><Pencil size={15} /> Editar perfil</button></div>{message && <p className="mt-3 text-sm text-emerald-300">{message}</p>}</>;
+  return <form onSubmit={save} className="mt-6 grid gap-3 border-t border-gray-700 pt-5"><h4 className="font-medium text-[var(--gold)]">Editar perfil</h4><div className="flex items-center gap-3"><div className="h-16 w-16 overflow-hidden rounded-full border border-[var(--gold)]/40 bg-black">{avatar ? <img src={avatar} alt="Vista previa" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-xl text-[var(--gold)]">{nombre[0]?.toUpperCase()}</span>}</div><label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm text-slate-200"><Camera size={15} /> Cambiar foto<input type="file" accept="image/*" onChange={selectImage} className="hidden" /></label>{avatar && <button type="button" onClick={() => setAvatar("")} className="inline-flex items-center gap-1 text-sm text-rose-300"><Trash2 size={15} /> Quitar</button>}</div><label className="grid gap-1 text-sm text-slate-300">Nombre<input value={nombre} onChange={(event) => setNombre(event.target.value)} required minLength={2} className="rounded-lg border border-white/10 bg-black p-2 text-white" /></label><label className="grid gap-1 text-sm text-slate-300">Email<input value={email} onChange={(event) => setEmail(event.target.value)} required type="email" className="rounded-lg border border-white/10 bg-black p-2 text-white" /></label><label className="grid gap-1 text-sm text-slate-300">Teléfono<input value={telefono} onChange={(event) => setTelefono(event.target.value)} maxLength={30} type="tel" className="rounded-lg border border-white/10 bg-black p-2 text-white" /></label><div className="flex gap-2"><button disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-[var(--gold)] px-3 py-2 text-sm font-semibold text-black disabled:opacity-50"><Save size={15} /> {saving ? "Guardando..." : "Guardar cambios"}</button><button type="button" onClick={() => setEditing(false)} className="rounded-lg border border-white/20 px-3 py-2 text-sm">Cancelar</button></div>{message && <p className="text-sm text-rose-300">{message}</p>}</form>;
+}

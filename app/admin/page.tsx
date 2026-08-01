@@ -1,15 +1,18 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
-import { isAdmin } from "@/lib/session";
+import { getSession, isAdmin } from "@/lib/session";
 import AdminStats from "@/components/admin/AdminStats";
 import ReservationsAdmin from "@/components/admin/ReservationsAdmin";
 import UsersAdmin from "@/components/admin/UsersAdmin";
 import ServicesAdmin from "@/components/admin/ServicesAdmin";
 import BarbersAdmin from "@/components/admin/BarbersAdmin";
+import ProfileCard from "@/components/dashboard/ProfileCard";
 import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
   if (!(await isAdmin())) redirect("/");
+  const session = await getSession();
+  const profile = session ? await prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, nombre: true, email: true, telefono: true, avatar: true, rol: true } }) : null;
 
   const [totalReservas, totalUsuarios, totalServicios, totalBarberos] = await Promise.all([
     prisma.reserva.count(),
@@ -46,6 +49,8 @@ export default async function AdminPage() {
     <main className="min-h-screen bg-black text-white py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-semibold text-[#D4AF37] mb-6">Admin Dashboard</h1>
+
+        <div className="mb-6 max-w-md"><ProfileCard user={profile} /></div>
 
         <AdminStats stats={{ totalReservas, totalUsuarios, totalServicios, totalBarberos }} />
 
