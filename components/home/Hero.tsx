@@ -38,7 +38,7 @@ export default function Hero() {
           <h2>Tu lugar.<br />Tu momento.</h2>
           <p>Turnos claros, confirmaciones rápidas y profesionales que conocen tu estilo.</p>
           <div className="home-card-details">
-            <span><Clock3 size={16} /> Lun–Sáb · 10:00–20:00</span>
+            <span><Clock3 size={16} /> Lun–Sáb · 08:00–12:30 / 14:30–19:30</span>
             <span><MapPin size={16} /> Atención con reserva</span>
           </div>
         </motion.aside>

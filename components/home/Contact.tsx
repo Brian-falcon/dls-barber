@@ -7,7 +7,7 @@ import Link from "next/link";
 const contacts = [
   { label: "WhatsApp", value: "+598 98 863 041", href: "https://wa.me/59898863041", icon: MessageCircle },
   { label: "Instagram", value: "@dlsbarber_", href: "https://www.instagram.com/dlsbarber_/", icon: AtSign },
-  { label: "Horarios", value: "Lun–Sáb · 10:00 a 20:00", icon: Clock3 },
+  { label: "Horarios", value: "Lun–Sáb · 08:00–12:30 / 14:30–19:30", icon: Clock3 },
   { label: "Atención", value: "Con reserva previa", icon: MapPin },
 ];
 

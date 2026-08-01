@@ -106,6 +106,7 @@ export default function BookingForm() {
   }
 
   const selectedService = services.find((service) => service.id === serviceId);
+  const isClosedSunday = Boolean(date) && new Date(`${date}T12:00:00.000Z`).getUTCDay() === 0;
 
   return (
     <section className="mx-auto max-w-3xl rounded-3xl bg-white/5 p-8 shadow-xl">
@@ -131,6 +132,7 @@ export default function BookingForm() {
             Día
             <input value={date} onChange={(event) => setDate(event.target.value)} min={today()} className="rounded-xl border border-slate-700 bg-slate-900 p-3" type="date" required />
           </label>
+          {isClosedSunday && <p className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-100">Los domingos la barbería permanece cerrada. Elegí una fecha de lunes a sábado.</p>}
           <fieldset>
             <legend className="mb-2">Horario {selectedService ? `(${selectedService.duracion} min)` : ""}</legend>
             {slots.length === 0 ? <p className="text-sm text-slate-400">No hay horarios disponibles para esta combinación.</p> : (
