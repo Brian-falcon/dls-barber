@@ -49,7 +49,10 @@ export type SessionPayload = {
 };
 
 function sign(payload: string) {
-  return crypto.createHmac(DIGEST, AUTH_SECRET!).update(payload).digest("base64url");
+  if (!AUTH_SECRET || AUTH_SECRET.length < 32) {
+    throw new Error("AUTH_SECRET debe tener al menos 32 caracteres.");
+  }
+  return crypto.createHmac(DIGEST, AUTH_SECRET).update(payload).digest("base64url");
 }
 
 export function createSessionToken(userId: string, rol: string) {

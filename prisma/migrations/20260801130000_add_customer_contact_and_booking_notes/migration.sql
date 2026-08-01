@@ -1,0 +1,2 @@
+ALTER TABLE "User" ADD COLUMN "telefono" TEXT;
+ALTER TABLE "Reserva" ADD COLUMN "notas" TEXT;

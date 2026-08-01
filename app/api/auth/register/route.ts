@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nombre, email, password } = body;
+    const { nombre, email, password, telefono } = body;
 
     if (!nombre || !email || !password) {
       return NextResponse.json({ error: "Todos los campos son obligatorios." }, { status: 400 });
@@ -22,6 +22,9 @@ export async function POST(request: Request) {
     if (!validatePassword(password)) {
       return NextResponse.json({ error: "La contraseña debe tener al menos 8 caracteres." }, { status: 400 });
     }
+    if (telefono != null && (typeof telefono !== "string" || telefono.trim().length > 30)) {
+      return NextResponse.json({ error: "Teléfono inválido." }, { status: 400 });
+    }
 
     const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     if (existingUser) {
@@ -34,6 +37,7 @@ export async function POST(request: Request) {
         nombre: nombre.trim(),
         email: email.toLowerCase(),
         password: hashedPassword,
+        telefono: telefono?.trim() || null,
         rol: "CLIENTE",
       },
     });

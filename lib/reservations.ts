@@ -13,6 +13,12 @@ function fromMinutes(mins: number) {
   return `${hh}:${mm}`;
 }
 
+function isValidDate(date: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+}
+
 export async function generateSlots({
   serviceDuration = 30,
   step = 30,
@@ -33,7 +39,7 @@ export async function generateSlots({
   return slots;
 }
 
-export async function getReservationsForBarberOnDate(barberId: string, date: string) {
+export async function getReservationsForBarberOnDate(barberId: string, date: string, excludeReservationId?: string) {
   // date expected `YYYY-MM-DD`
   const start = new Date(date + "T00:00:00.000Z");
   const end = new Date(start);
@@ -46,42 +52,50 @@ export async function getReservationsForBarberOnDate(barberId: string, date: str
         gte: start,
         lt: end,
       },
+      estado: { not: "CANCELADA" },
+      ...(excludeReservationId ? { id: { not: excludeReservationId } } : {}),
     },
     include: { service: true },
   });
 }
 
-export async function getAvailableSlots(serviceId: string, barberId: string, date: string) {
-  const service = await prisma.service.findUnique({ where: { id: serviceId } });
-  if (!service) return [];
+export async function getAvailableSlots(serviceId: string, barberId: string, date: string, excludeReservationId?: string) {
+  if (!isValidDate(date)) return [];
+  const [service, barber] = await Promise.all([
+    prisma.service.findUnique({ where: { id: serviceId } }),
+    prisma.barber.findUnique({ where: { id: barberId }, select: { activo: true } }),
+  ]);
+  if (!service || !barber?.activo) return [];
   const duration = service.duracion;
   const slots = await generateSlots({ serviceDuration: duration, step: 30 });
 
-  const reservas = await getReservationsForBarberOnDate(barberId, date);
+  const reservas = await getReservationsForBarberOnDate(barberId, date, excludeReservationId);
 
-  // mark occupied slots
-  const occupied = new Set<string>();
-  for (const r of reservas) {
-    const startMin = toMinutes(r.hora);
-    const dur = r.service?.duracion ?? duration;
-    const endMin = startMin + dur;
-    // any slot that starts >= startMin and < endMin is blocked
-    for (const s of slots) {
-      const sMin = toMinutes(s);
-      if (sMin >= startMin && sMin < endMin) occupied.add(s);
-    }
-  }
-
-  return slots.filter((s) => !occupied.has(s));
+  return slots.filter((slot) => {
+    const now = new Date();
+    const isToday = date === now.toISOString().slice(0, 10);
+    const slotStart = toMinutes(slot);
+    if (isToday && slotStart <= now.getHours() * 60 + now.getMinutes()) return false;
+    const slotEnd = slotStart + duration;
+    return !reservas.some((reservation) => {
+      const reservationStart = toMinutes(reservation.hora);
+      const reservationEnd = reservationStart + reservation.service.duracion;
+      return slotStart < reservationEnd && reservationStart < slotEnd;
+    });
+  });
 }
 
-export async function createReservation({ usuarioId, barberId, serviceId, date, time }:{
+export async function createReservation({ usuarioId, barberId, serviceId, date, time, notas }:{
   usuarioId: string;
   barberId: string;
   serviceId: string;
   date: string; // YYYY-MM-DD
   time: string; // HH:MM
+  notas?: string;
 }) {
+  if (!isValidDate(date) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+    throw new Error("Fecha u horario inválido");
+  }
   const fecha = new Date(date + "T00:00:00.000Z");
   return prisma.reserva.create({
     data: {
@@ -90,6 +104,7 @@ export async function createReservation({ usuarioId, barberId, serviceId, date, 
       usuarioId,
       barberId,
       serviceId,
+      notas: notas?.trim().slice(0, 500) || null,
       estado: "PENDIENTE",
     },
   });
@@ -99,5 +114,6 @@ export async function cancelReservation({ reservaId, userId }:{ reservaId:string
   const reserva = await prisma.reserva.findUnique({ where: { id: reservaId } });
   if (!reserva) return null;
   if (reserva.usuarioId !== userId) return null;
+  if (reserva.estado === "CANCELADA" || reserva.estado === "FINALIZADA") return null;
   return prisma.reserva.update({ where: { id: reservaId }, data: { estado: "CANCELADA" } });
 }

@@ -1,10 +1,12 @@
 import React from "react";
+import PasswordForm from "@/components/dashboard/PasswordForm";
 
 type UserProfile = {
   id: string;
   nombre?: string;
   email: string;
-  telefono?: string;
+  telefono?: string | null;
+  rol?: "ADMIN" | "BARBERO" | "CLIENTE";
 };
 
 export default function ProfileCard({ user }: { user: UserProfile | null }) {
@@ -22,7 +24,7 @@ export default function ProfileCard({ user }: { user: UserProfile | null }) {
         <div className="w-16 h-16 rounded-full bg-yellow-700/20 flex items-center justify-center text-2xl text-[#D4AF37]">{(user.nombre || user.email || "U")[0]}</div>
         <div>
           <h3 className="text-lg font-semibold">{user.nombre ?? user.email}</h3>
-          <p className="text-sm text-gray-400">Cliente</p>
+          <p className="text-sm text-gray-400">{user.rol === "ADMIN" ? "Administrador" : user.rol === "BARBERO" ? "Barbero" : "Cliente"}</p>
         </div>
       </div>
 
@@ -36,6 +38,7 @@ export default function ProfileCard({ user }: { user: UserProfile | null }) {
           <span className="text-right text-gray-200">{user.telefono ?? "-"}</span>
         </div>
       </div>
+      <PasswordForm />
     </div>
   );
 }

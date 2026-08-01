@@ -8,6 +8,7 @@ export default function RegistroPage() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,7 +20,7 @@ export default function RegistroPage() {
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, email, password }),
+      body: JSON.stringify({ nombre, email, password, telefono }),
     });
 
     const data = await response.json();
@@ -30,7 +31,7 @@ export default function RegistroPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/dashboard");
   }
 
   return (
@@ -38,6 +39,10 @@ export default function RegistroPage() {
       <div className="w-full max-w-lg rounded-3xl border border-[rgba(212,175,55,0.2)] bg-slate-950/95 p-10 shadow-xl">
         <h1 className="text-4xl font-bold mb-6 text-[var(--gold)]">Crear cuenta</h1>
         <form className="grid gap-5" onSubmit={handleSubmit}>
+          <label className="flex flex-col gap-2 text-slate-200">
+            Teléfono (opcional)
+            <input value={telefono} onChange={(event) => setTelefono(event.target.value)} className="rounded-2xl bg-slate-900 border border-slate-700 p-4 text-white" type="tel" placeholder="Tu teléfono" maxLength={30} />
+          </label>
           <label className="flex flex-col gap-2 text-slate-200">
             Nombre completo
             <input

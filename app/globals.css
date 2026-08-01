@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090909;
+  --background: #060708;
   --foreground: #ffffff;
   --gold: #d4af37;
 }
@@ -15,7 +15,13 @@ html {
 }
 
 body {
-  background: var(--background);
+  background: radial-gradient(circle at 12% -10%, rgba(212, 175, 55, .16), transparent 28rem), radial-gradient(circle at 90% 12%, rgba(35, 79, 97, .22), transparent 26rem), var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.page-shell { min-height: 100vh; padding: 9rem 1.5rem 4rem; }
+.panel { border: 1px solid rgba(255,255,255,.11); border-radius: 1.1rem; background: linear-gradient(145deg, rgba(20,24,29,.92), rgba(5,6,8,.92)); box-shadow: 0 18px 45px rgba(0,0,0,.24); }
+.eyebrow { color: var(--gold); font-size: .72rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; }
+.page-title { margin-top: .5rem; font-size: clamp(2.25rem, 5vw, 4rem); font-weight: 700; letter-spacing: -.04em; }
+.section-title { margin-bottom: 1rem; color: #f7e7ad; font-size: 1.25rem; font-weight: 600; }

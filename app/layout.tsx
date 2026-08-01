@@ -4,6 +4,10 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const deploymentUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
+const metadataBase = new URL(configuredSiteUrl || deploymentUrl || "http://localhost:3000");
+
 const bebas = Bebas_Neue({
   weight: "400",
   subsets: ["latin"],
@@ -15,6 +19,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase,
   title: "DLS BARBER",
   description: "Barbería premium - Reservá tu turno online",
   applicationName: "DLS BARBER",
@@ -23,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DLS BARBER",
     description: "Barbería premium - Reservá tu turno online",
-    url: "https://your-domain.example/",
+    url: "/",
     siteName: "DLS BARBER",
   },
   robots: {

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { isAdmin } from "@/lib/session";
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+  if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   const params = await context.params;
   const id = params.id;
   const barber = await prisma.barber.findUnique({ where: { id } });

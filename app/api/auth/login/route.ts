@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyPassword, createSessionToken, createSessionCookie, validateEmail, validatePassword } from "@/lib/auth";
+import { verifyPassword, createSessionToken, createSessionCookie, validateEmail } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -7,11 +7,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
-    if (!email || !password) {
+    if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
       return NextResponse.json({ error: "Email y contraseña son obligatorios." }, { status: 400 });
     }
 
-    if (!validateEmail(email) || !validatePassword(password)) {
+    if (!validateEmail(email)) {
       return NextResponse.json({ error: "Credenciales inválidas." }, { status: 400 });
     }
 

@@ -12,8 +12,10 @@ model User {
   nombre        String
   email         String   @unique
   password      String
+  telefono      String?
   rol           Role     @default(CLIENTE)
   reservas      Reserva[]
+  barberProfile Barber?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -25,9 +27,11 @@ model Barber {
   descripcion String?
   activo      Boolean  @default(true)
   reservas    Reserva[]
+  userId      String?  @unique
+  user        User?    @relation(fields: [userId], references: [id])
 
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now()) @updatedAt
 }
 
 model Service {
@@ -39,7 +43,7 @@ model Service {
   reservas    Reserva[]
 
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now()) @updatedAt
 }
 
 model Reserva {
@@ -50,12 +54,13 @@ model Reserva {
   usuarioId  String
   barberId   String
   serviceId  String
+  notas      String?
   usuario    User          @relation(fields: [usuarioId], references: [id])
   barber     Barber        @relation(fields: [barberId], references: [id])
   service    Service       @relation(fields: [serviceId], references: [id])
 
   createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  updatedAt  DateTime      @default(now()) @updatedAt
 }
 
 enum Role {

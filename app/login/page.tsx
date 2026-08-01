@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/dashboard");
   }
 
   return (
@@ -68,6 +69,7 @@ export default function LoginPage() {
             {isLoading ? "Ingresando..." : "Entrar"}
           </button>
         </form>
+        <p className="mt-6 text-center text-sm text-slate-300">¿No tenés cuenta? <Link href="/registro" className="text-[var(--gold)] hover:underline">Creala ahora</Link></p>
       </div>
     </main>
   );

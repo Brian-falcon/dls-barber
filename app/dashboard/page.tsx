@@ -1,58 +1,33 @@
-import React from "react";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import ProfileCard from "@/components/dashboard/ProfileCard";
 import UpcomingClient from "@/components/dashboard/UpcomingClient";
 import HistoryClient from "@/components/dashboard/HistoryClient";
-import { redirect } from "next/navigation";
+import BarberSchedule from "@/components/dashboard/BarberSchedule";
 
 export default async function DashboardPage() {
   const session = await getSession();
   if (!session) redirect("/login");
+  const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, nombre: true, email: true, telefono: true, rol: true } });
+  if (!user) redirect("/login");
 
-  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  if (user.rol === "BARBERO") {
+    const barber = await prisma.barber.findUnique({ where: { userId: user.id }, select: { id: true, nombre: true } });
+    const appointments = barber ? await prisma.reserva.findMany({
+      where: { barberId: barber.id, estado: { in: ["PENDIENTE", "CONFIRMADA"] }, fecha: { gte: new Date(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z") } },
+      include: { service: { select: { nombre: true } }, usuario: { select: { nombre: true, email: true } } },
+      orderBy: [{ fecha: "asc" }, { hora: "asc" }],
+    }) : [];
+    return <main className="page-shell"><div className="mx-auto max-w-6xl"><p className="eyebrow">Panel profesional</p><h1 className="page-title">Agenda de {barber?.nombre ?? user.nombre}</h1><div className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]"><ProfileCard user={user} />{barber ? <section><h2 className="section-title">Próximos turnos</h2><BarberSchedule initial={appointments.map((appointment) => ({ ...appointment, fecha: appointment.fecha.toISOString() }))} /></section> : <section className="panel p-6"><h2 className="section-title">Perfil pendiente de asignación</h2><p className="text-slate-300">Un administrador debe vincular tu cuenta a un profesional desde Administración → Barberos.</p></section>}</div></div></main>;
+  }
 
-  const reservasRaw = await prisma.reserva.findMany({
-    where: { usuarioId: session.userId },
-    include: { barber: true, service: true },
-    orderBy: { fecha: "desc" },
-  });
-
-  const todayIso = new Date().toISOString().slice(0, 10);
-
-  const reservas = reservasRaw.map((r) => ({
-    id: r.id,
-    fecha: r.fecha.toISOString(),
-    hora: r.hora,
-    estado: r.estado,
-    barber: { id: r.barber.id, nombre: r.barber.nombre },
-    service: { id: r.service.id, nombre: r.service.nombre, duracion: r.service.duracion },
-  }));
-
-  const upcoming = reservas.filter((r) => r.fecha.slice(0, 10) >= todayIso && r.estado !== "CANCELADA");
-  const history = reservas.filter((r) => !(r.fecha.slice(0, 10) >= todayIso) || r.estado === "CANCELADA");
-
-  return (
-    <main className="min-h-screen bg-black text-white py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-semibold text-[#D4AF37] mb-6">Panel de Cliente</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
-            <ProfileCard user={user} />
-          </div>
-          <div className="md:col-span-2 space-y-6">
-            <section>
-              <h2 className="text-xl font-medium text-[#D4AF37] mb-3">Próximas reservas</h2>
-              <UpcomingClient reservas={upcoming} />
-            </section>
-
-            <section>
-              <h2 className="text-xl font-medium text-[#D4AF37] mb-3">Historial</h2>
-              <HistoryClient reservas={history} />
-            </section>
-          </div>
-        </div>
-      </div>
-    </main>
-  );
+  if (user.rol === "ADMIN") redirect("/admin");
+  const bookings = await prisma.reserva.findMany({ where: { usuarioId: user.id }, include: { barber: { select: { id: true, nombre: true } }, service: { select: { id: true, nombre: true, duracion: true } } }, orderBy: { fecha: "desc" } });
+  const reservations = bookings.map((booking) => ({ id: booking.id, fecha: booking.fecha.toISOString(), hora: booking.hora, estado: booking.estado, barber: booking.barber, service: booking.service }));
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = reservations.filter((reservation) => reservation.fecha.slice(0, 10) >= today && !["CANCELADA", "FINALIZADA"].includes(reservation.estado));
+  const history = reservations.filter((reservation) => !upcoming.some((item) => item.id === reservation.id));
+  const title = "Mi cuenta";
+  return <main className="page-shell"><div className="mx-auto max-w-6xl"><p className="eyebrow">DLS Barber</p><h1 className="page-title">{title}</h1><div className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]"><ProfileCard user={user} /><div className="space-y-8"><section><h2 className="section-title">Próximas reservas</h2><UpcomingClient reservas={upcoming} /></section><section><h2 className="section-title">Historial</h2><HistoryClient reservas={history} /></section></div></div></div></main>;
 }

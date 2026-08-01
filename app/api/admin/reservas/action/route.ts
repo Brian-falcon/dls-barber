@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { isAdmin } from "@/lib/session";
 
 export async function POST(request: Request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+  if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const body = await request.json();
   const { reservaId, action } = body;
@@ -13,11 +12,16 @@ export async function POST(request: Request) {
   const reserva = await prisma.reserva.findUnique({ where: { id: reservaId } });
   if (!reserva) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  let estado = reserva.estado;
-  if (action === 'confirmar') estado = 'CONFIRMADA';
-  else if (action === 'cancelar') estado = 'CANCELADA';
-  else if (action === 'finalizar') estado = 'FINALIZADA';
-  else return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  const nextStates: Record<string, string[]> = {
+    PENDIENTE: ["confirmar", "cancelar"],
+    CONFIRMADA: ["cancelar", "finalizar"],
+    CANCELADA: [],
+    FINALIZADA: [],
+  };
+  if (!nextStates[reserva.estado].includes(action)) {
+    return NextResponse.json({ error: "La transición de estado no es válida" }, { status: 409 });
+  }
+  const estado = action === "confirmar" ? "CONFIRMADA" : action === "cancelar" ? "CANCELADA" : "FINALIZADA";
 
   const updated = await prisma.reserva.update({ where: { id: reservaId }, data: { estado } });
   return NextResponse.json({ reserva: updated });

@@ -11,6 +11,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Missing params" }, { status: 400 });
   }
 
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return NextResponse.json({ error: "Fecha inválida" }, { status: 400 });
+  }
+
   const slots = await getAvailableSlots(serviceId, barberId, date);
   return NextResponse.json({ slots });
 }

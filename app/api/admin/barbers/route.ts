@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { isAdmin } from "@/lib/session";
 
 export async function GET() {
+  if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   const barbers = await prisma.barber.findMany({ orderBy: { nombre: 'asc' } });
   return NextResponse.json({ barbers });
 }
 
 export async function POST(request: Request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+  if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   const body = await request.json();
   const { nombre } = body;
-  if (!nombre) return NextResponse.json({ error: 'Missing' }, { status: 400 });
-  const barber = await prisma.barber.create({ data: { nombre, activo: true } });
+  if (typeof nombre !== "string" || nombre.trim().length < 2) return NextResponse.json({ error: "Nombre inválido" }, { status: 400 });
+  const barber = await prisma.barber.create({ data: { nombre: nombre.trim(), activo: true } });
   return NextResponse.json({ barber });
 }
