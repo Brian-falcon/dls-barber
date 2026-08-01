@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
@@ -24,6 +25,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       data: { userId },
       include: { user: { select: { id: true, nombre: true, email: true } } },
     });
+    revalidatePath("/");
     return NextResponse.json({ barber: updated });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

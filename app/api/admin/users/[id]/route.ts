@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {
   if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
@@ -13,5 +14,7 @@ export async function DELETE(_: Request, context: { params: Promise<{ id: string
     prisma.reserva.deleteMany({ where: { usuarioId: id } }),
     prisma.user.delete({ where: { id } }),
   ]);
+  revalidatePath("/reservas");
+  revalidatePath("/dashboard");
   return NextResponse.json({ ok: true });
 }
