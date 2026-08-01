@@ -1,12 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock3, Instagram, MapPin, MessageCircle } from "lucide-react";
+import { AtSign, Clock3, MapPin, MessageCircle } from "lucide-react";
 import Link from "next/link";
 
 const contacts = [
   { label: "WhatsApp", value: "+598 98 863 041", href: "https://wa.me/59898863041", icon: MessageCircle },
-  { label: "Instagram", value: "@dlsbarber_", href: "https://www.instagram.com/dlsbarber_/", icon: Instagram },
+  { label: "Instagram", value: "@dlsbarber_", href: "https://www.instagram.com/dlsbarber_/", icon: AtSign },
   { label: "Horarios", value: "Lun–Sáb · 10:00 a 20:00", icon: Clock3 },
   { label: "Atención", value: "Con reserva previa", icon: MapPin },
 ];
