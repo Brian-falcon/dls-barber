@@ -1,17 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
-type DynamicRouteContext = {
-  params?: { id: string } | Promise<{ id: string }>;
-};
-
-export async function DELETE(request: Request, context: DynamicRouteContext) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-  let params = context?.params;
-  if (params && typeof params.then === "function") params = await params;
-  const id = params?.id as string;
+  const params = await context.params;
+  const id = params.id;
   await prisma.service.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }

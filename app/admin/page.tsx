@@ -21,7 +21,11 @@ export default async function AdminPage() {
     prisma.barber.count(),
   ]);
 
-  const reservas = await prisma.reserva.findMany({ include: { barber: true, service: true, usuario: true }, orderBy: { fecha: 'desc' }, take: 100 });
+  const reservasRaw = await prisma.reserva.findMany({ include: { barber: true, service: true, usuario: true }, orderBy: { fecha: 'desc' }, take: 100 });
+  const reservas = reservasRaw.map((r) => ({
+    ...r,
+    fecha: r.fecha.toISOString(),
+  }));
   const users = await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 200 });
   const services = await prisma.service.findMany({ orderBy: { nombre: 'asc' } });
   const barbers = await prisma.barber.findMany({ orderBy: { nombre: 'asc' } });

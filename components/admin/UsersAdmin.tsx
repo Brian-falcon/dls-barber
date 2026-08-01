@@ -37,7 +37,7 @@ export default function UsersAdmin({ initial }: { initial: UserData[] }) {
             <div className="text-sm text-gray-400">{u.email}</div>
           </div>
           <div className="flex items-center gap-2">
-            <select value={u.rol} onChange={(e) => changeRole(u.id, e.target.value)} className="bg-black border border-gray-700 text-white p-1 rounded">
+            <select value={u.rol} onChange={(e) => changeRole(u.id, e.target.value as UserData['rol'])} className="bg-black border border-gray-700 text-white p-1 rounded">
               <option value="CLIENTE">CLIENTE</option>
               <option value="ADMIN">ADMIN</option>
               <option value="BARBERO">BARBERO</option>
