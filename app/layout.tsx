@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   title: "DLS BARBER",
   description: "Barbería premium - Reservá tu turno online",
   applicationName: "DLS BARBER",
+  manifest: "/manifest.webmanifest",
   keywords: ["barbería", "cortes", "reservas", "barbero", "DLS"],
   authors: [{ name: "DLS BARBER" }],
   openGraph: {
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
 
 export const viewport = {
   colorScheme: "dark",
+  themeColor: "#060708",
 };
 
 export default function RootLayout({
