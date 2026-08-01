@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, CalendarDays, Clock3, MapPin, ShieldCheck } from "lucide-react";
 import PwaInstaller from "@/components/pwa/PwaInstaller";
@@ -33,7 +34,7 @@ export default function Hero() {
         </div>
         <motion.aside variants={heroMotion} className="home-hero-card">
           <div className="home-card-topline"><span>PRÓXIMA VISITA</span><i /></div>
-          <div className="home-cut-mark">DLS</div>
+          <div className="home-cut-mark"><Image src="/images/brand/dls-logo.png" alt="Logo DLS BARBER" fill sizes="110px" className="home-brand-mark" /></div>
           <h2>Tu lugar.<br />Tu momento.</h2>
           <p>Turnos claros, confirmaciones rápidas y profesionales que conocen tu estilo.</p>
           <div className="home-card-details">

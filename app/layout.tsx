@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   description: "Barbería premium - Reservá tu turno online",
   applicationName: "DLS BARBER",
   manifest: "/manifest.webmanifest",
+  icons: { icon: "/icon-512.png", apple: "/icon-512.png" },
   keywords: ["barbería", "cortes", "reservas", "barbero", "DLS"],
   authors: [{ name: "DLS BARBER" }],
   openGraph: {
