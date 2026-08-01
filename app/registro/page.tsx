@@ -1,92 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff, LockKeyhole, Mail, MoveRight, Phone, UserRound } from "lucide-react";
+import AuthLayout from "@/components/auth/AuthLayout";
 
 export default function RegistroPage() {
   const router = useRouter();
-  const [nombre, setNombre] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setIsLoading(true);
-
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, email, password, telefono }),
-    });
-
-    const data = await response.json();
-    setIsLoading(false);
-
-    if (!response.ok) {
-      setError(data.error || "Error al crear la cuenta.");
-      return;
-    }
-
-    router.push("/dashboard");
-  }
-
-  return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-24 bg-black text-white">
-      <div className="w-full max-w-lg rounded-3xl border border-[rgba(212,175,55,0.2)] bg-slate-950/95 p-10 shadow-xl">
-        <h1 className="text-4xl font-bold mb-6 text-[var(--gold)]">Crear cuenta</h1>
-        <form className="grid gap-5" onSubmit={handleSubmit}>
-          <label className="flex flex-col gap-2 text-slate-200">
-            Teléfono (opcional)
-            <input value={telefono} onChange={(event) => setTelefono(event.target.value)} className="rounded-2xl bg-slate-900 border border-slate-700 p-4 text-white" type="tel" placeholder="Tu teléfono" maxLength={30} />
-          </label>
-          <label className="flex flex-col gap-2 text-slate-200">
-            Nombre completo
-            <input
-              value={nombre}
-              onChange={(event) => setNombre(event.target.value)}
-              className="rounded-2xl bg-slate-900 border border-slate-700 p-4 text-white"
-              type="text"
-              placeholder="Tu nombre"
-              required
-            />
-          </label>
-          <label className="flex flex-col gap-2 text-slate-200">
-            Email
-            <input
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="rounded-2xl bg-slate-900 border border-slate-700 p-4 text-white"
-              type="email"
-              placeholder="email@ejemplo.com"
-              required
-            />
-          </label>
-          <label className="flex flex-col gap-2 text-slate-200">
-            Contraseña
-            <input
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="rounded-2xl bg-slate-900 border border-slate-700 p-4 text-white"
-              type="password"
-              placeholder="Contraseña"
-              minLength={8}
-              required
-            />
-          </label>
-          {error && <p className="text-sm text-rose-400">{error}</p>}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="rounded-2xl bg-[var(--gold)] py-4 text-black font-semibold transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? "Registrando..." : "Registrar"}
-          </button>
-        </form>
-      </div>
-    </main>
-  );
+  const [nombre, setNombre] = useState(""); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [telefono, setTelefono] = useState(""); const [showPassword, setShowPassword] = useState(false); const [error, setError] = useState<string | null>(null); const [isLoading, setIsLoading] = useState(false);
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); setError(null); setIsLoading(true); try { const response = await fetch("/api/auth/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nombre, email, password, telefono }) }); const data = await response.json(); if (!response.ok) return setError(data.error || "No pudimos crear tu cuenta."); router.push("/dashboard"); router.refresh(); } catch { setError("No pudimos conectar. Intentá nuevamente."); } finally { setIsLoading(false); } }
+  return <AuthLayout eyebrow="Crear una cuenta" title={<>Empezá tu<br /><span>experiencia.</span></>} description="Registrate una sola vez y reservá tus próximas visitas en minutos."><form className="auth-form" onSubmit={handleSubmit}><label className="auth-label"><span>Nombre completo</span><div className="auth-input-wrap"><UserRound size={18} /><input value={nombre} onChange={(event) => setNombre(event.target.value)} type="text" autoComplete="name" placeholder="Tu nombre y apellido" required /></div></label><label className="auth-label"><span>Email</span><div className="auth-input-wrap"><Mail size={18} /><input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" placeholder="nombre@email.com" required /></div></label><label className="auth-label"><span>Teléfono <i>Opcional</i></span><div className="auth-input-wrap"><Phone size={18} /><input value={telefono} onChange={(event) => setTelefono(event.target.value)} type="tel" autoComplete="tel" placeholder="+598 99 000 000" maxLength={30} /></div></label><label className="auth-label"><span>Contraseña</span><div className="auth-input-wrap"><LockKeyhole size={18} /><input value={password} onChange={(event) => setPassword(event.target.value)} type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Mínimo 8 caracteres" minLength={8} required /><button type="button" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></label>{error && <p role="alert" className="auth-error">{error}</p>}<button type="submit" disabled={isLoading} className="auth-submit">{isLoading ? "Creando cuenta..." : <>Crear mi cuenta <MoveRight size={18} /></>}</button></form><p className="auth-switch">¿Ya tenés una cuenta? <Link href="/login">Iniciá sesión</Link></p></AuthLayout>;
 }
