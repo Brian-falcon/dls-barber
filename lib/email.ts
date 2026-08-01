@@ -5,6 +5,25 @@ function escapeHtml(value: string) { return value.replace(/[&<>'"]/g, (character
 function formatDate(date: Date) { return new Intl.DateTimeFormat("es-UY", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "America/Montevideo" }).format(date); }
 
 async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  const brevoApiKey = process.env.BREVO_API_KEY;
+  const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL;
+
+  if (brevoApiKey && brevoSenderEmail) {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": brevoApiKey, Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { email: brevoSenderEmail, name: process.env.BREVO_SENDER_NAME || "DLS BARBER" },
+        replyTo: { email: brevoSenderEmail, name: process.env.BREVO_SENDER_NAME || "DLS BARBER" },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      }),
+    });
+    if (!response.ok) throw new Error("No se pudo enviar el correo.");
+    return;
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   if (!apiKey || !from) throw new Error("El correo transaccional no está configurado.");
