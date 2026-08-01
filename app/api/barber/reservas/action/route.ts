@@ -16,6 +16,11 @@ export async function POST(request: Request) {
     sendReservationEmail({ to: updated.usuario.email, name: updated.usuario.nombre, barber: updated.barber.nombre, service: updated.service.nombre, date: updated.fecha, time: updated.hora, status: "CONFIRMADA" }).catch((error) => console.error("Reservation email failed", error));
     return NextResponse.json({ reserva: updated });
   }
+  if (action === "cancelar" && ["PENDIENTE", "CONFIRMADA"].includes(reservation.estado)) {
+    const updated = await prisma.reserva.update({ where: { id: reservation.id }, data: { estado: "CANCELADA" }, include: { usuario: { select: { nombre: true, email: true } }, barber: { select: { nombre: true } }, service: { select: { nombre: true } } } });
+    sendReservationEmail({ to: updated.usuario.email, name: updated.usuario.nombre, barber: updated.barber.nombre, service: updated.service.nombre, date: updated.fecha, time: updated.hora, status: "CANCELADA" }).catch((error) => console.error("Reservation email failed", error));
+    return NextResponse.json({ reserva: updated });
+  }
   if (action === "finalizar" && reservation.estado === "CONFIRMADA") {
     return NextResponse.json({ reserva: await prisma.reserva.update({ where: { id: reservation.id }, data: { estado: "FINALIZADA" } }) });
   }

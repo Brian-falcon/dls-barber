@@ -10,7 +10,7 @@ type ReservaAdmin = {
   usuarioId: string;
   service: { nombre: string };
   barber: { nombre: string };
-  usuario?: { email: string };
+  usuario?: { nombre: string; email: string; telefono?: string | null };
   notas?: string | null;
 };
 
@@ -72,7 +72,8 @@ export default function ReservationsAdmin({ initial }: { initial: ReservaAdmin[]
             <div>
               <div className="text-sm text-gray-300">{new Date(reservation.fecha).toLocaleDateString()} · {reservation.hora}</div>
               <div className="text-sm text-white">{reservation.service.nombre} — {reservation.barber.nombre}</div>
-              <div className="text-sm text-gray-400">Usuario: {reservation.usuario?.email ?? reservation.usuarioId}</div>
+              <div className="text-sm text-gray-300">Cliente: {reservation.usuario?.nombre ?? reservation.usuarioId}</div>
+              <div className="text-sm text-gray-400">Email: {reservation.usuario?.email ?? "Sin email"}{reservation.usuario?.telefono ? ` · Tel: ${reservation.usuario.telefono}` : ""}</div>
               {reservation.notas && <div className="mt-1 text-sm text-gray-300">Notas: {reservation.notas}</div>}
             </div>
             <div className="flex flex-wrap items-center gap-2">

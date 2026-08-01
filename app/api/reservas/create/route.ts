@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { createReservation, getAvailableSlots } from "@/lib/reservations";
+import { prisma } from "@/lib/prisma";
+import { sendReservationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -22,6 +24,8 @@ export async function POST(request: Request) {
 
     if (notas != null && typeof notas !== "string") return NextResponse.json({ error: "Notas inválidas" }, { status: 400 });
     const reserva = await createReservation({ usuarioId: user.id, barberId, serviceId, date, time, notas });
+    const emailReservation = await prisma.reserva.findUnique({ where: { id: reserva.id }, include: { usuario: { select: { nombre: true, email: true } }, barber: { select: { nombre: true } }, service: { select: { nombre: true } } } });
+    if (emailReservation) sendReservationEmail({ to: emailReservation.usuario.email, name: emailReservation.usuario.nombre, barber: emailReservation.barber.nombre, service: emailReservation.service.nombre, date: emailReservation.fecha, time: emailReservation.hora, status: "PENDIENTE" }).catch((error) => console.error("Reservation email failed", error));
     return NextResponse.json({ reserva }, { status: 201 });
   } catch (error) {
     console.error(error);

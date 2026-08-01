@@ -22,7 +22,7 @@ export default async function AdminPage() {
     include: {
       barber: { select: { id: true, nombre: true } },
       service: { select: { id: true, nombre: true, duracion: true } },
-      usuario: { select: { id: true, nombre: true, email: true } },
+      usuario: { select: { id: true, nombre: true, email: true, telefono: true } },
     },
     orderBy: { fecha: "desc" },
     take: 100,

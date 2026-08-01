@@ -16,7 +16,7 @@ export default async function DashboardPage() {
     const barber = await prisma.barber.findUnique({ where: { userId: user.id }, select: { id: true, nombre: true } });
     const appointments = barber ? await prisma.reserva.findMany({
       where: { barberId: barber.id, estado: { in: ["PENDIENTE", "CONFIRMADA"] }, fecha: { gte: new Date(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z") } },
-      include: { service: { select: { nombre: true } }, usuario: { select: { nombre: true, email: true } } },
+      include: { service: { select: { nombre: true } }, usuario: { select: { nombre: true, email: true, telefono: true } } },
       orderBy: [{ fecha: "asc" }, { hora: "asc" }],
     }) : [];
     return <main className="page-shell"><div className="mx-auto max-w-6xl"><p className="eyebrow">Panel profesional</p><h1 className="page-title">Agenda de {barber?.nombre ?? user.nombre}</h1><div className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]"><ProfileCard user={user} />{barber ? <section><h2 className="section-title">Próximos turnos</h2><BarberSchedule initial={appointments.map((appointment) => ({ ...appointment, fecha: appointment.fecha.toISOString() }))} /></section> : <section className="panel p-6"><h2 className="section-title">Perfil pendiente de asignación</h2><p className="text-slate-300">Un administrador debe vincular tu cuenta a un profesional desde Administración → Barberos.</p></section>}</div></div></main>;
