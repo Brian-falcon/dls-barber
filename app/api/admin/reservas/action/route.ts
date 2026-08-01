@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/session";
+import { sendReservationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
   }
   const estado = action === "confirmar" ? "CONFIRMADA" : action === "cancelar" ? "CANCELADA" : "FINALIZADA";
 
-  const updated = await prisma.reserva.update({ where: { id: reservaId }, data: { estado } });
+  const updated = await prisma.reserva.update({ where: { id: reservaId }, data: { estado }, include: { usuario: { select: { nombre: true, email: true } }, barber: { select: { nombre: true } }, service: { select: { nombre: true } } } });
+  if (estado === "CONFIRMADA" || estado === "CANCELADA") sendReservationEmail({ to: updated.usuario.email, name: updated.usuario.nombre, barber: updated.barber.nombre, service: updated.service.nombre, date: updated.fecha, time: updated.hora, status: estado }).catch((error) => console.error("Reservation email failed", error));
   return NextResponse.json({ reserva: updated });
 }

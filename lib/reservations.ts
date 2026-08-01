@@ -115,5 +115,5 @@ export async function cancelReservation({ reservaId, userId }:{ reservaId:string
   if (!reserva) return null;
   if (reserva.usuarioId !== userId) return null;
   if (reserva.estado === "CANCELADA" || reserva.estado === "FINALIZADA") return null;
-  return prisma.reserva.update({ where: { id: reservaId }, data: { estado: "CANCELADA" } });
+  return prisma.reserva.update({ where: { id: reservaId }, data: { estado: "CANCELADA" }, include: { usuario: { select: { nombre: true, email: true } }, barber: { select: { nombre: true } }, service: { select: { nombre: true } } } });
 }

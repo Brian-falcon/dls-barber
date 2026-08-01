@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { cancelReservation } from "@/lib/reservations";
+import { sendReservationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -14,6 +15,7 @@ export async function POST(request: Request) {
 
     const canceled = await cancelReservation({ reservaId, userId: user.id });
     if (!canceled) return NextResponse.json({ error: "No autorizado o no existe" }, { status: 403 });
+    sendReservationEmail({ to: canceled.usuario.email, name: canceled.usuario.nombre, barber: canceled.barber.nombre, service: canceled.service.nombre, date: canceled.fecha, time: canceled.hora, status: "CANCELADA" }).catch((error) => console.error("Reservation email failed", error));
     return NextResponse.json({ reserva: canceled });
   } catch (error) {
     console.error(error);

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/session";
 import { getAvailableSlots } from "@/lib/reservations";
+import { sendReservationEmail } from "@/lib/email";
 
 export async function PATCH(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
@@ -27,8 +28,9 @@ export async function PATCH(request: Request) {
         fecha: new Date(`${date}T00:00:00.000Z`),
         hora: time,
         estado: reserva.estado === "CANCELADA" ? "PENDIENTE" : reserva.estado,
-      },
+      }, include: { usuario: { select: { nombre: true, email: true } }, barber: { select: { nombre: true } }, service: { select: { nombre: true } } },
     });
+    sendReservationEmail({ to: updated.usuario.email, name: updated.usuario.nombre, barber: updated.barber.nombre, service: updated.service.nombre, date: updated.fecha, time: updated.hora, status: "REPROGRAMADA" }).catch((error) => console.error("Reservation email failed", error));
     return NextResponse.json({ reserva: { ...updated, fecha: updated.fecha.toISOString() } });
   } catch {
     return NextResponse.json({ error: "No se pudo reprogramar la reserva" }, { status: 500 });
