@@ -19,6 +19,12 @@ function isValidDate(date: string) {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
 }
 
+export function businessDateToday() {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Montevideo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+  const value = (type: string) => parts.find((part) => part.type === type)?.value || "";
+  return `${value("year")}-${value("month")}-${value("day")}`;
+}
+
 export async function generateSlots({
   serviceDuration = 30,
   step = 30,
@@ -73,7 +79,9 @@ export async function getAvailableSlots(serviceId: string, barberId: string, dat
 
   return slots.filter((slot) => {
     const now = new Date();
-    const isToday = date === now.toISOString().slice(0, 10);
+    const today = businessDateToday();
+    if (date < today) return false;
+    const isToday = date === today;
     const slotStart = toMinutes(slot);
     if (isToday && slotStart <= now.getHours() * 60 + now.getMinutes()) return false;
     const slotEnd = slotStart + duration;

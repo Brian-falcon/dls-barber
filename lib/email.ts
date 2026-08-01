@@ -2,7 +2,7 @@ type ResetEmail = { to: string; resetUrl: string; name: string };
 type ReservationEmail = { to: string; name: string; barber: string; service: string; date: Date; time: string; status: "CONFIRMADA" | "CANCELADA" | "REPROGRAMADA" };
 
 function escapeHtml(value: string) { return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character] ?? character); }
-function formatDate(date: Date) { return new Intl.DateTimeFormat("es-UY", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "America/Montevideo" }).format(date); }
+function formatDate(date: Date) { return new Intl.DateTimeFormat("es-UY", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(date); }
 
 async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
   const brevoApiKey = process.env.BREVO_API_KEY;
