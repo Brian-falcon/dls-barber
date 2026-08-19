@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, CalendarDays, Clock3, MapPin, ShieldCheck } from "lucide-react";
+import { ArrowRight, CalendarCheck2, CalendarDays, Clock3, MapPin, ShieldCheck } from "lucide-react";
 import PwaInstaller from "@/components/pwa/PwaInstaller";
 
 const heroMotion = {
@@ -33,12 +33,14 @@ export default function Hero() {
           </motion.div>
         </div>
         <motion.aside variants={heroMotion} className="home-hero-card">
-          <div className="home-card-topline"><span>PRÓXIMA VISITA</span><i /></div>
-          <div className="home-cut-mark"><Image src="/images/brand/dls-logo.png" alt="Logo DLS BARBER" fill sizes="110px" className="home-brand-mark" /></div>
-          <h2>Tu lugar.<br />Tu momento.</h2>
-          <p>Turnos claros, confirmaciones rápidas y profesionales que conocen tu estilo.</p>
+          <div className="home-card-topline"><span>AGENDA DIGITAL</span><i aria-label="Agenda disponible" /></div>
+          <div className="home-appointment-preview">
+            <div className="home-cut-mark"><Image src="/images/brand/dls-logo.png" alt="Logo DLS BARBER" fill sizes="110px" className="home-brand-mark" /></div>
+            <div><span className="home-preview-label">PRÓXIMO TURNO</span><strong>Elegí tu horario</strong><p>Confirmación inmediata.</p></div>
+          </div>
+          <div className="home-card-time"><CalendarCheck2 size={18} /><div><span>Disponibilidad semanal</span><strong>Lunes a sábado</strong></div></div>
           <div className="home-card-details">
-            <span><Clock3 size={16} /> Lun–Sáb · 08:00–12:30 / 14:30–19:30</span>
+            <span><Clock3 size={16} /> 08:00–12:30 · 14:30–19:30</span>
             <span><MapPin size={16} /> Atención con reserva</span>
           </div>
         </motion.aside>
